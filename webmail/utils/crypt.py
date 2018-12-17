@@ -26,6 +26,7 @@ def get_encrypted_content(plain_text):
 
 
 def get_decrypted_content(encrypted_content):
+
     encrypted_content = base64.decodestring( encrypted_content )
     private_key = RSA.importKey(get_key_path('../keys/private.pem').read())
     cipher_rsa = PKCS1_OAEP.new(private_key)

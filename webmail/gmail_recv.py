@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from utils.constants import *
 
 
-def find_all_mail(from_who_email, subject_txt , limit):
+def find_all_mail(browser , from_who_email, subject_txt , limit=10):
     mails = browser.find_elements_by_class_name('zE')
     # mails.click()
 
@@ -47,6 +47,7 @@ def find_all_mail(from_who_email, subject_txt , limit):
 
             browser.back()
 
+
     return emails_list
 
 
@@ -54,6 +55,7 @@ def find_all_mail(from_who_email, subject_txt , limit):
 def find_single_mail( from_who_email, subject_txt):
     mails = browser.find_elements_by_class_name('zE')
     # mails.click()
+
 
     for item in mails:
         # item.click()
@@ -86,6 +88,8 @@ def find_single_mail( from_who_email, subject_txt):
 
 
 def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):
+    g_emails_list = []
+
     try:
         browser.get(GMAIL_WEBSITE)
 
@@ -113,12 +117,63 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
         time.sleep(7)
         # Now I am logged in
 
-        return find_all_mail( from_who_email, subject_txt)
+        mails = browser.find_elements_by_class_name('zE')
+        # mails.click()
+
+
+
+        index_limit = 0;
+        for item in mails:
+            # item.click()
+
+            time.sleep(2)
+            iTR = item
+
+            itd = iTR.find_elements(By.TAG_NAME, 'td')
+
+            subject = itd[5].find_element_by_class_name('bqe').text
+
+            time.sleep(2)
+
+            if (subject_txt in subject):
+
+
+                if index_limit > LIMIT_UNREADMAIL:
+                    print("Exception::LIMIT REACHED" + LIMIT_UNREADMAIL)
+                    return g_emails_list
+
+                iTR.click()
+                time.sleep(2)
+
+                body2 = browser.find_element_by_xpath(
+                    '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')
+
+
+                # toAdd = body2.text;
+
+                toAdd = (body2.text + '.')[:-1]
+
+                print("###################")
+
+                time.sleep(2)
+
+                g_emails_list.append( toAdd )
+                #print(emails_list[index_limit])
+
+                index_limit = index_limit + 1
+
+                browser.back()
+            else:
+                print('...')
+
+       # return emails_list
+
 
     except Exception as ex:
+        print("Exception::")
         print(str(ex))
     finally:
-        return None
+        return g_emails_list
 
 
 def login_recv_single_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):

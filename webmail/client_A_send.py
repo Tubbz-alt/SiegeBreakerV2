@@ -30,8 +30,10 @@ def main(argv):
     OD1_IP = argv[2]
     TIMEOUT = argv[3]
     SRC_PORT = argv[4]
+    ISN_NUMBER = str(random.getrandbits(32))
 
-    payload = MAGIC_WORD + SEP + OD2_IP + SEP + OD1_IP + SEP + TIMEOUT + SEP + SRC_PORT + SEP
+
+    payload = MAGIC_WORD + SEP + OD2_IP + SEP + OD1_IP + SEP + TIMEOUT + SEP + SRC_PORT + SEP + ISN_NUMBER + SEP
 
     print("Payload : " + PING_A_SUBJECT + " : " + payload)
     cipher_text = get_encrypted_content(payload)
@@ -47,6 +49,7 @@ def main(argv):
 
     print("Email Sent to Controller")
     print("Waiting for Ack.....")
+
 
 
 if __name__ == '__main__':
