@@ -31,6 +31,8 @@ def find_all_mail(browser , from_who_email, subject_txt , limit=10):
             if index_limit > limit:
                 return emails_list
 
+            iEmailId = iTR.find_elements_by_class_name('bA4')[1].find_element_by_class_name('zF').get_attribute('email')
+
             iTR.click()
             time.sleep(2)
 
@@ -42,6 +44,8 @@ def find_all_mail(browser , from_who_email, subject_txt , limit=10):
             print("###################")
 
             time.sleep(2)
+
+
 
             emails_list.append( body2.text )
 
@@ -89,6 +93,7 @@ def find_single_mail( from_who_email, subject_txt):
 
 def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):
     g_emails_list = []
+    g_email_ids = []
 
     try:
         browser.get(GMAIL_WEBSITE)
@@ -130,6 +135,8 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
             iTR = item
 
             itd = iTR.find_elements(By.TAG_NAME, 'td')
+            iEmailId = iTR.find_elements_by_class_name('bA4')[1].find_element_by_class_name('zF').get_attribute('email')
+
 
             subject = itd[5].find_element_by_class_name('bqe').text
 
@@ -141,6 +148,12 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
                 if index_limit > LIMIT_UNREADMAIL:
                     print("Exception::LIMIT REACHED" + LIMIT_UNREADMAIL)
                     return g_emails_list
+
+
+                # sender_id = browser.find_element_by_css_selector('#\3a 7y > div.adn.ads > div.gs > div.gE.iv.gt > table > tbody > tr:nth-child(1) > td.gF.gK > table > tbody > tr > td > h3 > span > span.gD')
+                # print(sender_id.text)
+                #
+
 
                 iTR.click()
                 time.sleep(2)
@@ -158,6 +171,8 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
                 time.sleep(2)
 
                 g_emails_list.append( toAdd )
+                g_email_ids.append(iEmailId)
+
                 #print(emails_list[index_limit])
 
                 index_limit = index_limit + 1
@@ -173,7 +188,7 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
         print("Exception::")
         print(str(ex))
     finally:
-        return g_emails_list
+        return g_emails_list , g_email_ids
 
 
 def login_recv_single_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):

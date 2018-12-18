@@ -29,8 +29,7 @@ def send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, br
 
     time.sleep(2)
 
-
-    sendElem = browser.find_element_by_xpath('//*[@id=":7w"]')  # not sure if this is correct too
+    sendElem = browser.find_element_by_xpath('//*[@id=":8t"]')  # not sure if this is correct too
     time.sleep(2)
     sendElem.click()
 
