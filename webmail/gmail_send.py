@@ -29,7 +29,9 @@ def send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, br
 
     time.sleep(2)
 
-    sendElem = browser.find_element_by_xpath('//*[@id=":8t"]')  # not sure if this is correct too
+
+
+    sendElem = browser.find_element_by_xpath('//*[@id=":81"]')  # not sure if this is correct too
     time.sleep(2)
     sendElem.click()
 
@@ -77,7 +79,6 @@ def login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_t
 if __name__ == '__main__':
     browser = webdriver.Chrome()
 
-
-    login_send_mail(CLIENT_MAIL, CLIENT_MAIL_PASSWD, CONTROLLER_EMAIL, "WHATEVER", "GOTOHELL", browser);
+    login_send_mail(CLIENT_MAIL, CLIENT_MAIL_PASSWD, CONTROLLER_EMAIL, "WHATEVER", "GOTOHELL2", browser);
 
     print("Main called")

@@ -56,7 +56,7 @@ def find_all_mail(browser , from_who_email, subject_txt , limit=10):
 
 
 
-def find_single_mail( from_who_email, subject_txt):
+def find_single_mail( from_who_email, subject_txt , browser):
     mails = browser.find_elements_by_class_name('zE')
     # mails.click()
 

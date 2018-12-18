@@ -1,4 +1,6 @@
 #!/usr/bin/python
+import cPickle
+import json
 
 from scapy.layers.inet import ICMP, IP
 import gmail_send
@@ -16,6 +18,7 @@ import time
 import sys
 from utils.constants import *
 from utils.crypt import get_encrypted_content
+from webmail import gmail_recv
 
 
 def main(argv):
@@ -33,7 +36,10 @@ def main(argv):
     ISN_NUMBER = str(random.getrandbits(32))
 
 
-    payload = MAGIC_WORD + SEP + OD2_IP + SEP + OD1_IP + SEP + TIMEOUT + SEP + SRC_PORT + SEP + ISN_NUMBER + SEP
+    PUBLIC_KEY , PRIVATEKEY = crypt.get_ec_public_private_key()
+
+
+    payload = MAGIC_WORD + SEP + OD2_IP + SEP + OD1_IP + SEP + TIMEOUT + SEP + SRC_PORT + SEP + ISN_NUMBER + SEP + PUBLIC_KEY + SEP
 
     print("Payload : " + PING_A_SUBJECT + " : " + payload)
     cipher_text = get_encrypted_content(payload)
@@ -49,6 +55,19 @@ def main(argv):
 
     print("Email Sent to Controller")
     print("Waiting for Ack.....")
+
+    time.sleep(10)
+
+    #
+    # cipher_text = gmail_recv.find_single_mail(recv_email , PING_A_ACK_SUB , browser)
+    #
+    # plain_text = seccure.decrypt( cipher_text ,  PRIVATEKEY)
+    #
+    # if plain_text == PING_A_ACK_BODY:
+    #     print("DECOY ROUTING SETUP COMPLETE")
+    # else:
+    #     print(plain_text + "&&" + PING_A_ACK_BODY)
+
 
 
 

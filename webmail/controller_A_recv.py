@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import cPickle
 
 from scapy.layers.inet import ICMP, IP
 import gmail_recv
@@ -16,14 +17,18 @@ import time
 import sys
 from utils.constants import *
 from utils.crypt import get_decrypted_content
+from utils.crypt import get_encrypted_content
+
 
 import controller_internal_ping
 from webmail import gmail_send
 
 
-def send_ack_to_client(email_to_send_to , browser):
+def send_ack_to_client(email_to_send_to , browser, client_public_key):
 
-    gmail_send.send_mail(CONTROLLER_EMAIL ,CONTROLLER_EMAIL_PASSWD , email_to_send_to , PING_A_ACK_SUB , PING_A_ACK_BODY , browser)
+    body_txt = seccure.encrypt(PING_A_ACK_BODY , client_public_key)
+
+    gmail_send.send_mail(CONTROLLER_EMAIL ,CONTROLLER_EMAIL_PASSWD , email_to_send_to , PING_A_ACK_SUB , body_txt , browser)
 
 
 def main():
@@ -53,6 +58,9 @@ def main():
             SRC_PORT = argv[4]
             ISN_NUMBER = argv[5]
 
+            client_public_key = argv[6]
+
+
             #Throwing out ISN as of now
             passed_args = argv[1: 5]
 
@@ -63,7 +71,7 @@ def main():
             #controller_internal_ping.main( passed_args )
 
             time.sleep(2)
-            send_ack_to_client(email_id_list[index] , browser)
+            send_ack_to_client(email_id_list[index] , browser , client_public_key)
 
             time.sleep(2)
 
