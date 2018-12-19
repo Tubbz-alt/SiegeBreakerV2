@@ -46,6 +46,17 @@ def test_ec_crypto():
 
 
 
+def seccure_get_encrypted_content(plain_text , public_key):
+    cipher_text = seccure.encrypt(plain_text, public_key)
+    return base64.encodestring(cipher_text)
+
+
+def seccure_get_decrypted_content(cipher_text , private_key):
+    cipher_text = base64.decodestring(cipher_text)
+    plain_text = seccure.decrypt(cipher_text, private_key)
+    return plain_text
+
+
 
 def get_encrypted_content(plain_text , public_key = None):
 

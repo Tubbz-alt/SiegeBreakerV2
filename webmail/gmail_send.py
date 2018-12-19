@@ -1,5 +1,7 @@
 import time
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 from utils.constants import *
@@ -29,11 +31,14 @@ def send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, br
 
     time.sleep(2)
 
+    upper_send = browser.find_element_by_class_name('btC')
 
+    inner_Send = upper_send.find_elements(By.TAG_NAME, 'td')
 
-    sendElem = browser.find_element_by_xpath('//*[@id=":81"]')  # not sure if this is correct too
-    time.sleep(2)
-    sendElem.click()
+    actual_send = inner_Send[0]
+
+    actual_send.click()
+
 
     time.sleep(5)
 
@@ -79,6 +84,6 @@ def login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_t
 if __name__ == '__main__':
     browser = webdriver.Chrome()
 
-    login_send_mail(CLIENT_MAIL, CLIENT_MAIL_PASSWD, CONTROLLER_EMAIL, "WHATEVER", "GOTOHELL2", browser);
+    login_send_mail(CLIENT_MAIL, CLIENT_MAIL_PASSWD, CONTROLLER_EMAIL, "WHATEVER", "GOTOHELLfsdfsdfsdf2", browser);
 
     print("Main called")

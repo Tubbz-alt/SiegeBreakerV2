@@ -12,12 +12,14 @@ import binascii
 from random import randint
 from Crypto.PublicKey import RSA
 from datetime import datetime
-import seccure
+
 import time
 
 import sys
 from utils.constants import *
 from utils.crypt import get_encrypted_content
+from utils.crypt import seccure_get_decrypted_content
+
 from webmail import gmail_recv
 
 
@@ -56,17 +58,23 @@ def main(argv):
     print("Email Sent to Controller")
     print("Waiting for Ack.....")
 
-    time.sleep(10)
+    time.sleep(30)
 
-    #
-    # cipher_text = gmail_recv.find_single_mail(recv_email , PING_A_ACK_SUB , browser)
-    #
-    # plain_text = seccure.decrypt( cipher_text ,  PRIVATEKEY)
-    #
-    # if plain_text == PING_A_ACK_BODY:
-    #     print("DECOY ROUTING SETUP COMPLETE")
-    # else:
-    #     print(plain_text + "&&" + PING_A_ACK_BODY)
+
+    cipher_text = None
+    while cipher_text is None:
+        time.sleep(5)
+        cipher_text = gmail_recv.find_single_mail(recv_email, PING_A_ACK_SUB, browser)
+
+
+    print("Waiting Complete")
+    plain_text = seccure_get_decrypted_content( cipher_text ,  PRIVATEKEY)
+
+
+    if plain_text == PING_A_ACK_BODY:
+        print("DECOY ROUTING SETUP COMPLETE")
+    else:
+        print(plain_text + "&&" + PING_A_ACK_BODY)
 
 
 

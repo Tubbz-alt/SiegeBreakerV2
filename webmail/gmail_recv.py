@@ -59,7 +59,7 @@ def find_all_mail(browser , from_who_email, subject_txt , limit=10):
 def find_single_mail( from_who_email, subject_txt , browser):
     mails = browser.find_elements_by_class_name('zE')
     # mails.click()
-
+    toReturn = None
 
     for item in mails:
         # item.click()
@@ -84,11 +84,15 @@ def find_single_mail( from_who_email, subject_txt , browser):
 
             print("###################")
 
-            time.sleep(2)
 
-            return body2.text
+            toReturn =  (body2.text + '.')[:-1]
 
             browser.back()
+            time.sleep(2)
+
+            break;
+
+    return toReturn
 
 
 def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):

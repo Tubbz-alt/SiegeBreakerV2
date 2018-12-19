@@ -11,13 +11,14 @@ import binascii
 from random import randint
 from Crypto.PublicKey import RSA
 from datetime import datetime
-import seccure
+
 import time
 
 import sys
 from utils.constants import *
 from utils.crypt import get_decrypted_content
 from utils.crypt import get_encrypted_content
+from utils.crypt import seccure_get_encrypted_content
 
 
 import controller_internal_ping
@@ -26,7 +27,8 @@ from webmail import gmail_send
 
 def send_ack_to_client(email_to_send_to , browser, client_public_key):
 
-    body_txt = seccure.encrypt(PING_A_ACK_BODY , client_public_key)
+    body_txt = seccure_get_encrypted_content(PING_A_ACK_BODY , client_public_key)
+
 
     gmail_send.send_mail(CONTROLLER_EMAIL ,CONTROLLER_EMAIL_PASSWD , email_to_send_to , PING_A_ACK_SUB , body_txt , browser)
 
