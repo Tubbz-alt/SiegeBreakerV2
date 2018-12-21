@@ -153,7 +153,7 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
 
                 if index_limit > LIMIT_UNREADMAIL:
                     print("Exception::LIMIT REACHED" + LIMIT_UNREADMAIL)
-                    return g_emails_list
+                    return g_emails_list , g_email_ids
 
 
                 # sender_id = browser.find_element_by_css_selector('#\3a 7y > div.adn.ads > div.gs > div.gE.iv.gt > table > tbody > tr:nth-child(1) > td.gF.gK > table > tbody > tr > td > h3 > span > span.gD')
