@@ -65,3 +65,20 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt):
     return  g_emails_list , g_email_ids
 
 
+def login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt):
+    return send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt)
+
+
+def login_find_single_mail(recv_email, recv_passwd , from_who_email ,  subject_txt):
+    imap_ssl_host = get_imap_name(recv_email)
+    toReturn = None
+
+
+    imapper = easyimap.connect(imap_ssl_host, recv_email, recv_passwd)
+    for mail in imapper.unseen(limit=constants.LIMIT_UNREADMAIL):
+        # mail = imapper.mail(mail_id)
+        if mail.title == subject_txt and mail.from_addr == from_who_email:
+            toReturn = mail.body
+            break;
+
+    return toReturn

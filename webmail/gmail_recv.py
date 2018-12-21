@@ -75,10 +75,11 @@ def find_single_mail( from_who_email, subject_txt , browser):
         itd = iTR.find_elements(By.TAG_NAME, 'td')
 
         subject = itd[5].find_element_by_class_name('bqe').text
+        iEmailId = iTR.find_elements_by_class_name('bA4')[1].find_element_by_class_name('zF').get_attribute('email')
 
         #time.sleep(2)
 
-        if (subject_txt in subject):
+        if (subject_txt in subject) and (iEmailId.strip() == from_who_email.strip()):
             iTR.click()
             #time.sleep(2)
 

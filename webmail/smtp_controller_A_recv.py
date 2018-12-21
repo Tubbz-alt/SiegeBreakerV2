@@ -1,4 +1,6 @@
 #!/usr/bin/python
+from time import sleep
+
 from utils.crypt import seccure_get_encrypted_content, get_decrypted_content
 from utils.constants import *
 from webmail import controller_internal_ping
@@ -57,4 +59,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    while True:
+        main()
+        sleep(10)
