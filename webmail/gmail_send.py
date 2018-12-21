@@ -4,75 +4,66 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from utils.constants import *
 
 
 def send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, browser):
+    wait = WebDriverWait(browser, 10)
     # Compose Email Button
-    composeElem = browser.find_element_by_class_name('z0')  # this only works half of the time
+    ts = time.time()
+    composeElem =  wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'z0')))
+    #print "time to login" + str(time.time() - ts_start)
     composeElem.click()
 
-    time.sleep(2)
 
     # To Button
-    toElem = browser.find_element_by_name("to")
+    toElem =  wait.until(EC.element_to_be_clickable((By.NAME, 'to')))
     toElem.send_keys(recv_email)
 
-    time.sleep(2)
-
-    subjElem = browser.find_element_by_name("subjectbox")
+    subjElem =  wait.until(EC.element_to_be_clickable((By.NAME, 'subjectbox')))
     subjElem.send_keys(subject_txt)
 
-    time.sleep(2)
-
-    bodyElem = browser.find_element_by_class_name(
-        'editable')  # _css_selector('#\:nw') #this is where I get stuck and not sure what to do here
+    bodyElem =  wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'editable')))
     bodyElem.send_keys(body_txt)
 
-    time.sleep(2)
-
-    upper_send = browser.find_element_by_class_name('btC')
+    upper_send =  wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'btC')))
 
     inner_Send = upper_send.find_elements(By.TAG_NAME, 'td')
 
     actual_send = inner_Send[0]
 
     actual_send.click()
-
-
-    time.sleep(5)
-
+    time.sleep(0.5)
+    print "compose and send" + str(time.time() - ts)
     return True;
 
 
 def login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, browser):
     try:
+	ts_start = time.time()
         browser.get(GMAIL_WEBSITE)
 
-        time.sleep(4)
-
-        emailElem = browser.find_element_by_id('identifierId')
+	wait = WebDriverWait(browser, 10)
+	emailElem = wait.until(EC.element_to_be_clickable((By.ID, 'identifierId')))
         emailElem.send_keys(sender_email)
 
-        next = browser.find_element_by_id('identifierNext')
-        if next:
-            next.click()
+	next = wait.until(EC.element_to_be_clickable((By.ID, 'identifierNext')))
+        next.click()
 
-        time.sleep(2)
-
-        passwordElem = browser.find_element_by_name("password")
+	passwordElem = wait.until(EC.element_to_be_clickable((By.NAME, 'password')))
         passwordElem.send_keys(sender_passwd)
         passwordElem.submit()
 
-        time.sleep(2)
-
         # Passwd Next Button
-        composeElem = browser.find_element_by_class_name("CwaK9")  # this only works half of the time
-        composeElem.click()
-
-        time.sleep(7)
+	passnext = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'CwaK9')))
+        passnext.click()
+	
+	print "time to login" + str(time.time() - ts_start)
+	
         # Now I am logged in
-
         return send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, browser)
 
     except Exception as ex:

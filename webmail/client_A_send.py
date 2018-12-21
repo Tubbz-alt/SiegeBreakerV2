@@ -20,7 +20,8 @@ from utils.constants import *
 from utils.crypt import get_encrypted_content
 from utils.crypt import seccure_get_decrypted_content
 
-from webmail import gmail_recv
+#from webmail 
+import gmail_recv
 
 
 def main(argv):
@@ -51,19 +52,28 @@ def main(argv):
     recv_email = CONTROLLER_EMAIL
     subject_txt = PING_A_SUBJECT
     body_txt = cipher_text
-    browser = webdriver.Chrome()
+
+    chrome_options = webdriver.ChromeOptions()
+    #chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    #chrome_options.add_argument('--disable-dev-shm-usage')
+    browser = webdriver.Chrome(chrome_options=chrome_options)
+
+
+    #browser = webdriver.Chrome()
+    #browser = webdriver.Firefox()
 
     gmail_send.login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt, browser);
 
     print("Email Sent to Controller")
     print("Waiting for Ack.....")
 
-    time.sleep(30)
+    #time.sleep(30)
 
 
     cipher_text = None
     while cipher_text is None:
-        time.sleep(5)
+        time.sleep(2)
         cipher_text = gmail_recv.find_single_mail(recv_email, PING_A_ACK_SUB, browser)
 
 

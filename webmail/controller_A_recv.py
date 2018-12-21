@@ -22,7 +22,8 @@ from utils.crypt import seccure_get_encrypted_content
 
 
 import controller_internal_ping
-from webmail import gmail_send
+#from webmail 
+import gmail_send
 
 
 def send_ack_to_client(email_to_send_to , browser, client_public_key):
@@ -37,7 +38,14 @@ def main():
 
     print("Initializing....")
 
-    browser = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    #chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    #chrome_options.add_argument('--disable-dev-shm-usage')
+    browser = webdriver.Chrome(chrome_options=chrome_options)
+
+    #browser = webdriver.Chrome()
+    #browser = webdriver.Firefox()
 
     payloads_list , email_id_list = gmail_recv.login_recv_all_mail(CONTROLLER_EMAIL, CONTROLLER_EMAIL_PASSWD, CLIENT_MAIL, PING_A_SUBJECT , browser);
 
@@ -70,12 +78,12 @@ def main():
 
             print(' '.join(passed_args))
 
-            #controller_internal_ping.main( passed_args )
+            controller_internal_ping.main( passed_args )
 
-            time.sleep(2)
+            #time.sleep(2)
             send_ack_to_client(email_id_list[index] , browser , client_public_key)
 
-            time.sleep(2)
+            #time.sleep(2)
 
 
 
