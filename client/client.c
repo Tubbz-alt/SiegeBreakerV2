@@ -1,6 +1,6 @@
 /*
-Author : SiegeBreaker Devs.
-*/
+ * Author : SiegeBreaker Devs
+ */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,9 +31,11 @@ Author : SiegeBreaker Devs.
 #include <openssl/err.h>
 #include "siegebreaker_c.h"
 
+
+//#define DEBUG 0
+#define DEBUG1 0
 char *target_ip;
 #define self_ip "192.168.2.3"
-
 
 int main(int argc, char *argv[]) {
     if (argc != 5) {
@@ -96,19 +98,27 @@ int main(int argc, char *argv[]) {
     unsigned char out[32], out1[32], out2[200];
     size_t indx;
     SSL_get_client_random(ssl, out, 32);
-
+    //printf("%s\n",out);
+    //for (indx = 0; indx < sizeof(out); ++indx) printf("%02x", out[indx]);
     SSL_get_server_random(ssl, out, 32);
+    //printf("\n");
+    //for (indx = 0; indx < sizeof(out); ++indx) printf("%02x", out[indx]);
     SSL_SESSION_get_master_key(SSL_get_session(ssl), out1, 48);
     out1[32] = '\0';
+    //printf("\n");
+    //for (indx = 0; indx < sizeof(out1); ++indx) printf("%02x", out1[indx]);
     printf("\n");
+    //SSL_SESSION_print(out2, SSL_get_session(ssl));
     strncpy(key, out1, 32);
 
-    // Send an initial GET request
+    // send an initial GET request
     req = "GET / HTTP/1.1\r\nHost: 192.168.2.4\r\n\r\n";
     req_len = strlen(req);
     SSL_write(ssl, req, req_len);
     memset(buf, '\0', sizeof(buf));
 
+    // wait for response, and start crafting decoy packets
+    if (DEBUG1) printf("\nSniffing for responses!\n");
     int sock_raw = socket(AF_INET, SOCK_RAW, IPPROTO_TCP); // make sure this is the only raw_socket in use
     if (sock_raw < 0) {
         printf("Socket Error!\n");
@@ -132,12 +142,16 @@ int main(int argc, char *argv[]) {
     if (getsockopt(sock_raw, SOL_SOCKET, SO_RCVBUF, &optval, &socklen) > 0)
         printf("getsock fails 2\n");
     printf("RCV Buffer size : %d", optval);
+
+
     Sniff_response *resp = sniff(sock_raw, self_ip, target_ip, 0);
 
-    char *str = (char *) malloc(50);
+    char *str = (char *) malloc(100);
     int len;
-    len = snprintf(str, 50, "./port_icmpTest.py 192.168.2.4 192.168.2.4 %s %d", argv[4], resp->port);
+    //len = snprintf(str, 50, "./port_icmpTest.py 192.168.2.4 192.168.2.4 %s %d", argv[4], resp->port);
+    len = snprintf(str, 100, "./webmail/client_A_send.py 192.168.2.4 192.168.2.4 %s %d", argv[4], resp->port);
     //strcat(str,"\0");
+    printf("\n%s\n",str);
     system(str);
 
     int fd;
@@ -156,8 +170,10 @@ int main(int argc, char *argv[]) {
     int count = 0;
 
 
+    if (DEBUG1) printf("Sending url packet\n");
+    //getchar();
     sprintf(initial_packet, "%s%s", out1, url);
-
+    //if(DEBUG1) 
     printf("Initial : %s\n key : %s\n", initial_packet + 32, out1);
     send_tls_packet(resp, initial_packet, sock_raw, target_ip, strlen(url) + 32 + 1);
 
@@ -174,9 +190,6 @@ int main(int argc, char *argv[]) {
         memcpy((char *) rhdr, sr->msg, sizeof(rel_header));
         if (rhdr->type == 10)
 
-            if (DEBUG)
-                printf("\nLooking for: %d, Receivd header \t%d : %d : %Lf : %d\n", total + 1, rhdr->seq, rhdr->ack,
-                       rhdr->timestamp, rhdr->type);
         data = buff;
         if (rhdr->type > 10) { // check for noise!
             free(sr->msg);
@@ -190,13 +203,17 @@ int main(int argc, char *argv[]) {
                 printf("\nReceivd header \t%d : %d : %Lf : %d : %d\n", rhdr->seq, rhdr->ack, rhdr->timestamp,
                        rhdr->type, rhdr->length);
             bytes = rhdr->length;
-
+            //cont_len = cont_len + bytes - sizeof(rel_header);
             total += bytes;
+
 
             write(fd, data, bytes - sizeof(rel_header));
             if (DEBUG) { printf("wrote_data %d:bytes %d:total %d:", count++, bytes, total); }
-
+            //return 0;
+            //}
         }
+
+
         set_rel_hdr(rhdr, 1, total + 1, rhdr->timestamp, rhdr->type);
         if (DEBUG) printf("\nSent Header\t%d : %d : %Lf : %d\n", rhdr->seq, rhdr->ack, rhdr->timestamp, rhdr->type);
         if (rhdr->type == 10) {
@@ -207,7 +224,6 @@ int main(int argc, char *argv[]) {
             memset(some, 0, 976);
             memcpy(some, rhdr, sizeof(rhdr));
             strcpy(some + sizeof(rhdr), msg);
-
             send_tls_packet(sr, some, sock_raw, target_ip, sizeof(rhdr) + strlen(msg));
             free(some);
             long double total_time = get_time() - t0;
@@ -227,6 +243,7 @@ int main(int argc, char *argv[]) {
             memcpy(reply, rhdr, sizeof(rel_header));
             send_tls_packet(sr, reply, sock_raw, target_ip, sizeof(rel_header));
 
+
         }
         free(sr->msg);
         free(sr);
@@ -235,6 +252,6 @@ int main(int argc, char *argv[]) {
     //SSL_free(ssl);
     //close(sd);
     //SSL_CTX_free(ctx);
-
+    //system(CLEAR_IPTABLES);
 }
 
