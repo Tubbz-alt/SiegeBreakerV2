@@ -3,6 +3,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from utils.constants import *
 
 
@@ -57,6 +60,8 @@ def find_all_mail(browser , from_who_email, subject_txt , limit=10):
 
 
 def find_single_mail( from_who_email, subject_txt , browser):
+    wait = WebDriverWait(browser, 100)
+    mail = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'zE')))
     mails = browser.find_elements_by_class_name('zE')
     # mails.click()
     toReturn = None
@@ -64,21 +69,23 @@ def find_single_mail( from_who_email, subject_txt , browser):
     for item in mails:
         # item.click()
 
-        time.sleep(2)
+        #time.sleep(2)
         iTR = item
 
         itd = iTR.find_elements(By.TAG_NAME, 'td')
 
         subject = itd[5].find_element_by_class_name('bqe').text
 
-        time.sleep(2)
+        #time.sleep(2)
 
         if (subject_txt in subject):
             iTR.click()
-            time.sleep(2)
+            #time.sleep(2)
 
-            body2 = browser.find_element_by_xpath(
-                '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')
+	    body2 = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')))
+
+            #body2 = browser.find_element_by_xpath(
+            #    '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')
 
             print(body2.text)
 
@@ -88,7 +95,7 @@ def find_single_mail( from_who_email, subject_txt , browser):
             toReturn =  (body2.text + '.')[:-1]
 
             browser.back()
-            time.sleep(2)
+            #time.sleep(2)
 
             break;
 
@@ -98,35 +105,30 @@ def find_single_mail( from_who_email, subject_txt , browser):
 def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, browser):
     g_emails_list = []
     g_email_ids = []
-
+    wait = WebDriverWait(browser, 10)
     try:
         browser.get(GMAIL_WEBSITE)
 
-        time.sleep(4)
-
-        emailElem = browser.find_element_by_id('identifierId')
+        #wait = WebDriverWait(browser, 10)
+        emailElem = wait.until(EC.element_to_be_clickable((By.ID, 'identifierId')))
         emailElem.send_keys(recv_email)
 
-        next = browser.find_element_by_id('identifierNext')
-        if next:
-            next.click()
+        next = wait.until(EC.element_to_be_clickable((By.ID, 'identifierNext')))
+        next.click()
 
-        time.sleep(2)
-
-        passwordElem = browser.find_element_by_name("password")
+        passwordElem = wait.until(EC.element_to_be_clickable((By.NAME, 'password')))
         passwordElem.send_keys(recv_passwd)
         passwordElem.submit()
 
-        time.sleep(2)
-
         # Passwd Next Button
-        composeElem = browser.find_element_by_class_name("CwaK9")  # this only works half of the time
-        composeElem.click()
+        passnext = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'CwaK9')))
+        passnext.click()
+        
+	# Now I am logged in
 
-        time.sleep(7)
-        # Now I am logged in
-
-        mails = browser.find_elements_by_class_name('zE')
+        emailwait = WebDriverWait(browser, 100)
+	mail = emailwait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'zE')))
+	mails = browser.find_elements_by_class_name('zE')
         # mails.click()
 
 
@@ -135,7 +137,7 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
         for item in mails:
             # item.click()
 
-            time.sleep(2)
+            #time.sleep(2)
             iTR = item
 
             itd = iTR.find_elements(By.TAG_NAME, 'td')
@@ -144,7 +146,7 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
 
             subject = itd[5].find_element_by_class_name('bqe').text
 
-            time.sleep(2)
+            #time.sleep(2)
 
             if (subject_txt in subject):
 
@@ -160,10 +162,11 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
 
 
                 iTR.click()
-                time.sleep(2)
-
-                body2 = browser.find_element_by_xpath(
-                    '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')
+                #time.sleep(2)
+		
+		body2 = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')))
+                #body2 = browser.find_element_by_xpath(
+                #    '/html/body/div[7]/div[3]/div/div[2]/div[1]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/table/tr/td[1]/div[2]/div[2]/div/div[3]/div/div/div/div/div/div[1]/div[2]/div[3]/div[3]/div/div[1]')
 
 
                 # toAdd = body2.text;
@@ -172,7 +175,7 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt, 
 
                 print("###################")
 
-                time.sleep(2)
+                #time.sleep(2)
 
                 g_emails_list.append( toAdd )
                 g_email_ids.append(iEmailId)
@@ -199,29 +202,22 @@ def login_recv_single_mail(recv_email, recv_passwd,  from_who_email , subject_tx
     try:
         browser.get(GMAIL_WEBSITE)
 
-        time.sleep(4)
-
-        emailElem = browser.find_element_by_id('identifierId')
+        wait = WebDriverWait(browser, 10)
+        emailElem = wait.until(EC.element_to_be_clickable((By.ID, 'identifierId')))
         emailElem.send_keys(recv_email)
 
-        next = browser.find_element_by_id('identifierNext')
-        if next:
-            next.click()
+        next = wait.until(EC.element_to_be_clickable((By.ID, 'identifierNext')))
+        next.click()
 
-        time.sleep(2)
-
-        passwordElem = browser.find_element_by_name("password")
+        passwordElem = wait.until(EC.element_to_be_clickable((By.NAME, 'password')))
         passwordElem.send_keys(recv_passwd)
         passwordElem.submit()
 
-        time.sleep(2)
-
         # Passwd Next Button
-        composeElem = browser.find_element_by_class_name("CwaK9")  # this only works half of the time
-        composeElem.click()
+        passnext = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'CwaK9')))
+        passnext.click()
 
-        time.sleep(7)
-        # Now I am logged in
+	# Now I am logged in
 
         return find_single_mail( from_who_email, subject_txt)
 

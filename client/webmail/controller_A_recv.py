@@ -80,10 +80,10 @@ def main():
 
             controller_internal_ping.main( passed_args )
 
-            time.sleep(2)
+            #time.sleep(2)
             send_ack_to_client(email_id_list[index] , browser , client_public_key)
 
-            time.sleep(2)
+            #time.sleep(2)
 
 
 

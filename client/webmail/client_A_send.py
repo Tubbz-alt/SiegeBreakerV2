@@ -68,12 +68,12 @@ def main(argv):
     print("Email Sent to Controller")
     print("Waiting for Ack.....")
 
-    time.sleep(30)
+    #time.sleep(30)
 
 
     cipher_text = None
     while cipher_text is None:
-        time.sleep(5)
+        time.sleep(2)
         cipher_text = gmail_recv.find_single_mail(recv_email, PING_A_ACK_SUB, browser)
 
 
