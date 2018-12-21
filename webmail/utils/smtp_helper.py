@@ -55,8 +55,8 @@ def login_recv_all_mail(recv_email, recv_passwd,  from_who_email , subject_txt):
     g_email_ids = []
 
     imapper = easyimap.connect(imap_ssl_host, recv_email, recv_passwd)
-    for mail_id in imapper.listids(limit=constants.LIMIT_UNREADMAIL):
-        mail = imapper.mail(mail_id)
+    for mail in imapper.unseen(limit=constants.LIMIT_UNREADMAIL):
+        #mail = imapper.mail(mail_id)
 
         if mail.title == subject_txt:
             g_email_ids.append(mail.from_addr)
