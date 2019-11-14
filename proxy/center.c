@@ -1,6 +1,8 @@
 
 /*
 Author : SiegeBreaker Devs.
+Purpose : This file contains code responsible to managing "Center" aka center for managing individual connections
+ i.e it spawns threads for each individual connection and manages what to pass on to each thread.
 */
 #include "custom_base64.h"
 #include "custom_parser.h"
@@ -13,24 +15,33 @@ Author : SiegeBreaker Devs.
 #define PORT 443
 #define maxsize 65536
 
-
+// System's IP Address
 #define self_ip "192.168.2.5"
-
+// URL to fetch
 #define URL_VAL "https://10.1.5.2/test_file.txt"
 
-
+/**
+ * Handles each DR request as seperate thread spawned by Center.
+ * This function contains code to be executed by each thread.
+ * @param  {void*} _void_thread_mgr Struct containing connection specific params
+ * @return {NULL}
+ */
 void *thread_handler_function(void *_void_thread_mgr) {
 
     thread_mgr *thMgr = (thread_mgr *) _void_thread_mgr;
 
-
+    //Create New IP Port entry in Database of active connections and get it's ID
     int db_id = gen_entry_and_add(thMgr->weak_db_ref, (thMgr->last_pkt)->ip, (thMgr->last_pkt)->port);
 
+    //Initialize a new string for passing command line arguments
     char system_str[2048] = {" "};
 
     int len_base64;
+    //Convert string to base64 as string is encrypted and passing encrypted string as command line argument
+    //can cause unexpected behaviour.
     char *baseOP = base64((thMgr->last_pkt)->msg, 32, &len_base64);
 
+    // Append other necessary information along with encrypted message to be passed to single connection process.
     printf("Running Single Conn Queue\n");
     int inserted_char = sprintf(system_str, "./single_conn_queue.o \"%lu::%lu::%d::%d::%d::%d::%s::%d::%d::",
                                 (thMgr->last_pkt)->reply_ack,
@@ -44,11 +55,11 @@ void *thread_handler_function(void *_void_thread_mgr) {
                                 len_base64
     );
 
-
+    //Add additional stuff to passed on string.
     strncpy(&system_str[inserted_char], baseOP, len_base64);
     inserted_char += len_base64;
 
-
+    //Adding seperator
     strncpy(&system_str[inserted_char], "::", 2);
 
     inserted_char += 2;
@@ -68,7 +79,9 @@ void *thread_handler_function(void *_void_thread_mgr) {
     int end = inserted_char + size_msg + 3 + 4;
 
     printf("CMD : ");
-
+    //Check if we have encountered any unexpected string, if we do, abort.
+    //TODO We should raise exception here of some sort as this could potentially compromise successful
+    // connection establishment
     int i;
     for (i = 0; i < end; ++i) {
 
@@ -81,56 +94,44 @@ void *thread_handler_function(void *_void_thread_mgr) {
 
     }
     printf("\n");
-
-
+    //Flushing output of previous logging.
     fflush(stdout);
 
     int delay = 10000;
-
+    //Adding some delay for us to analyse logged string
     while (delay--) {}
-
+    //Spawn new process and expect it to handle connection from now on.
     system(system_str);
 
 
     return NULL;
 }
 
-
-char *concat(const char *s1, const char *s2) {
-    char *result = malloc(strlen(s1) + strlen(s2) + 1);//+1 for the null-terminator
-
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
-
 int main() {
 
+    // Init descriptors
     int server_fd, new_socket, valread;
-
-
     char buffer[maxsize] = {0};
 
-
-
-
-    /************************libpcap initialization*******************************/
+    // Initialize libpcap related variables.
+    // TODO : Pull out interface name programmatically.
     char dev[] = {"eth0"};
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *descr;
     u_char *packet;
-    struct pcap_pkthdr hdr;     /* pcap.h */
-    struct ether_header *eptr;  /* net/ethernet.h */
+    struct pcap_pkthdr hdr;
+    struct ether_header *eptr;
     struct bpf_program filter;
-
-
+    // Init empty filter
     char filter_exp[1024] = {""};
 
+    // Look for packets destined to me{see self_ip} , My system's IP is 192.168.2.5;
+    // We don't ICMP packets and size should be greater than 150 - a rough estimate for decoy routing requests.
     int bytes_written = sprintf(filter_exp,
                                 "dst port %d and dst host 192.168.2.5 and not src host 192.168.2.4 and not icmp and greater 150",
                                 443);
 
+    //Log filter expression for verification.
     printf("filter_exp %s\n", filter_exp);
 
 //    char filter_exp[] = "dst port 443";
@@ -143,7 +144,6 @@ int main() {
     printf("DEV: %s\n", dev);
 
     /* open the device for sniffing.
-
        pcap_t *pcap_open_live(char *device,int snaplen, int prmisc,int to_ms,
        char *ebuf)
 
@@ -174,59 +174,49 @@ int main() {
         printf("Error setting filter - %s\n", pcap_geterr(descr));
         return 2;
     }
-    /*****************************libpcap init end********************************/
 
-
-
+    //Begin reading via libpcap
 
     printf("-> Starting Reading from SOCK_RAW Socket %d\n", PORT);
 
+    //Initializing 10 threads for now
+    //TODO : Allow dynamic allocation of thread instances.
     pthread_t inc_x_thread[10];
 
     int g_thread_counter = 0;
     db_mgr *g_db_structure = init_db();
 
-//	gen_entry_and_add( g_db_structure , "10.1.5.2", 443);
 
-
-    // check_main(g_db_structure);
-    // exit(0);
-
-
+// listen for new connections indefinitely.
     while (1) {
 
-        // len = recvfrom(sock, recvbuf, sizeof(recvbuf), 0 ,(struct sockaddr_in *)&pFrom , &iFromSize);
-
-        //  printf(" %d %s\n", len , recvbuf );
-
-
+        //Allocate required strcutures.
         KeyObj *iKey = (KeyObj *) malloc(sizeof(KeyObj));
         iKey->key_value = (char *) malloc(sizeof(char) * 32);
         iKey->isRSA_priv = 1;
 
 
         printf("Listening....\n");
-
+        //Sniff decoy routing request and get parsed data as return value;
         Sniff_response *packtObj = sniff_center(descr, self_ip, NULL, 1, iKey, g_db_structure);
 
 
         if (packtObj == NULL) continue;
 
+        //Copy Packets's message into key value.
         strncpy(iKey->key_value, packtObj->msg, 32);
 
-
-        if (!packtObj->msg || packtObj->msg[32] != 'h') {
+        if (!packtObj->msg || packtObj->msg[32] != 'h')
+        {
             printf("Invalid url inside center  \n");
             fflush(stdout);
 
             continue;
         }
 
-        //printf(" KEY_VAL : %s \n",iKey->key_value );
-
         iKey->isRSA_priv = 0;
 
-
+        //Logging captured Decoy Routing Request details
         printf("-> printing packet\n");
         printf("-> packet ip : %s\n", packtObj->ip);
         printf("-> port : %d\n", packtObj->port);
@@ -236,17 +226,17 @@ int main() {
         printf("-> seq : %lu\n", packtObj->reply_seq);
         printf("-> ack : %lu\n", packtObj->reply_ack);
 
-        if (validate_new_connection(g_db_structure, packtObj)) {
-
-
-            //Thread args setup
-
+        if (validate_new_connection(g_db_structure, packtObj))
+        {
+            //Threads arguments setup ;
             thread_mgr *thMgr = (thread_mgr *) calloc(sizeof(thread_mgr), 1);
             thMgr->last_pkt = NULL;
             thMgr->last_pkt = (packtObj);
+            //Setting socket id to be zero for now ; to be assigned later.
             thMgr->socket_id = 0;
             thMgr->weak_db_ref = g_db_structure;
 
+            //Create thread and pass on data structure to thread.
             if (pthread_create(&(inc_x_thread[g_thread_counter]), NULL,
                                thread_handler_function, &(*thMgr))) {
                 fprintf(stderr, "Error creating thread\n");
@@ -255,28 +245,7 @@ int main() {
 
         }
 
-        // if(pthread_join(inc_x_thread, NULL)) 
-        // {
-        //     fprintf(stderr, "Error joining thread\n");
-        //     return 2;
-        // }
     }
-
-
-
-
-
-// typedef struct packtObj_RESPONSE {
-//   char *msg;
-//   unsigned long reply_ack;
-//   unsigned long reply_seq;
-//   int urg_ptr;
-//   int window;
-//   int port;
-//   int length;
-//   char *ip;
-// } packtObj_response;
-
 
 }
 

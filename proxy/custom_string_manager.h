@@ -51,19 +51,30 @@ typedef struct SNIFF_RESPONSE {
 
 } Sniff_response;
 
-
-typedef struct thread_mgr {
-
+/*
+ * Structure used to pass on data to pthread instance.
+ *
+ */
+typedef struct thread_mgr
+{
+    //Socket to listen to
     int socket_id;
+    //Port for binding
     int port_to_bind_to;
-
+    //Reference to Center's DB structure.
     db_mgr *weak_db_ref;
-
+    //Packet sniffed via libpacp.
     Sniff_response *last_pkt;
-
 
 } thread_mgr;
 
+/**
+ * Concatenates two strings by allocating new memory, so that we're guaranteed to not run out of buffer.
+ * Please note that this is different from strcat family.
+ * @param  {const char*} s1 First string to be copied into output string
+ * @param  {const char*} s2 Second string to be copied into output string
+ * @return {NULL}
+ */
 
 char *concat_2_strings(const char *s1, const char *s2) {
     char *result = malloc(strlen(s1) + strlen(s2) + 1);

@@ -46,13 +46,13 @@ Author : SiegeBreaker Devs.
 #define CHUNK_SIZE 1024
 #define DEBUG 0
 
-//#define self_ip "10.1.2.2"
+// This system's IP
 uint8_t self_ip[32] = "192.168.2.5";
 
-
+// Over Destination IP
 #define OD_IP "192.168.2.4"
 
-#define IS_PRINTF_ON 0
+#define IS_PRINTF_ON 1
 
 int no_of_packets = 0;
 int MSS = 1024;
@@ -152,7 +152,14 @@ void set_rel_header(rel_header *rhdr, u_int32_t seq, u_int32_t ack, long double 
     rhdr->length = length;
 }
 
-void *proxy_to_client(void *_void_key_obj_ptr) {
+/**
+ * Sends data from proxy to client for each connection
+ * @param  {void*} key object pointer which contains key specific data.
+ * @return {void}
+ */
+
+void *proxy_to_client(void *_void_key_obj_ptr)
+{
     KeyObj *iKey = (KeyObj *) _void_key_obj_ptr;
 
     //printf("in proxy_to_client\n");
@@ -512,6 +519,12 @@ void add_pkt(char *content, Sniff_response *resp, int length) {
     }
 }
 
+
+/**
+ * Pulls OD content from SSL Context and Packet passed via struct odc.
+ * @param  {void*} odc Struct containing SSL context and Packet.
+ * @return {void}
+ */
 void *get_od_content(void *odc) {
     //printf("In od content! %p\n", odc);
     ODC *o = (ODC *) odc;
@@ -530,18 +543,8 @@ void *get_od_content(void *odc) {
     }
     URL *u = parse_url(resp->msg + 32);
     if (!u) return NULL;
-    /*host = gethostbyname(u->hostname);
-    int sd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sd < 0) return NULL;
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(SSL_PORT);
-    addr.sin_addr.s_addr = *(long*)(host->h_addr);
-
-    if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == -1 ) {
-      return NULL;
-    }*/
+    //SSL initialization
     BIO *bio;
     SSL_CTX *ctx = (SSL_CTX *) o->ctx;
     ssl = SSL_new(ctx);
@@ -579,21 +582,6 @@ void *get_od_content(void *odc) {
         i = BIO_read(bio, od_resp, SSL_CHUNK);
         t2 = t2 + get_time() - t1;
         t3 = get_time() - t1;
-        //printf("Not!\n");
-        //total += i;
-/*    int left;
-    left = SSL_CHUNK - i;
-    while (left > 0) {
-      i = SSL_read(ssl, od_resp + (SSL_CHUNK - left), left);
-  if (i <= 0) { break; }
-  printf("%d\n", i);
-  left -= i;
-    }*/
-        //printf(">> %d\n", i);
-        //if (i == 0) { break; }
-        // make a new pkt
-        //if (DEBUG) printf("%d - %s\n", i, od_resp);
-        //if (DEBUG) printf("waiting for lock!\n");
 
         if (first) {
             long double t = get_time();
@@ -634,7 +622,9 @@ void *get_od_content(void *odc) {
 
             total += i;
             pthread_mutex_lock(&mutex);
-            //if (DEBUG) printf("I am adding pkt!\n");
+#ifdef IS_PRINTF_ON
+            printf("I am adding pkt!\n");
+#endif
             add_pkt(od_resp, resp, i);
             //if (DEBUG)
             //printf("added pkt!\n");
@@ -669,27 +659,41 @@ void *get_od_content(void *odc) {
         pthread_mutex_unlock(&mutex);
         sem_post(&sem);*/  /* wake up consumer */
     }
+#ifdef IS_PRINTF_ON
     //printf("\nTime to download and make queue : %Lf\n Time to just read : %Lf \n\n Time for last read : %Lf",get_time()-t0,t2,t3);
     //printf("Goodbye OD %d; total: %d\n", i, total);
+#endif
     pthread_cond_signal(&condc);  /* wake up consumer */
     BIO_free_all(bio);
     SSL_CTX_free(ctx);
     return NULL;
 }
 
+
+/**
+ * Two utility functions to parse Int and unsigned long
+ * @param  {char*} string to be parsed
+ * @return {int or unsigned long : based on function name}
+ */
 int make_string_to_int(char *myarray) {
     int i;
     sscanf(myarray, "%d", &i);
     return i;
 }
-
 unsigned long make_string_to_uL(char *myarray) {
     unsigned long i;
     sscanf(myarray, "%lu", &i);
     return i;
 }
 
-//This function assumes asd::ASd::asd:: and NOT asd:Asd::asd. It should end with delim string
+/**
+ * Tokenizes string literal based on demilitor, which is assumed to be ::
+ * Moreover, this functions assumes that string ends with delim ::
+ * Thus, asd::ASd::asd:: will work but asd:Asd::asd will NOT.
+ * @param  {const chat*} my_str_literal String to be parsed.
+ * @return {char**} pointer to pointer containing parsed string.
+ */
+
 char **tokenize_with_sep(const char *my_str_literal) {
 
     char **retString = (char **) malloc(10);
@@ -711,10 +715,10 @@ char **tokenize_with_sep(const char *my_str_literal) {
             strncpy(retString[index], &cpy[last_index], i - last_index);
 
 
-//    retString[index][i-last_index + 1] = '\0';          
-//////
-//    if(IS_PRINTF_ON) printf("%d %d %s\n",  last_index , i , retString[index]);
-//
+#ifdef IS_PRINTF_ON
+    printf("%d %d %s\n",  last_index , i , retString[index]);
+#endif
+
             last_index = i + 2;
             i = last_index;
             index++;
@@ -724,6 +728,12 @@ char **tokenize_with_sep(const char *my_str_literal) {
 
     return retString;
 }
+
+/**
+ * Parses command line arguments sent by center whilst spawning new process.
+ * @param  {Sniff_response*} packtObj Struct containing per packet params
+ * @return {void}
+ */
 
 Sniff_response *parse_cmd_line_args(int argc, char *argv[]) {
 
@@ -740,33 +750,22 @@ Sniff_response *parse_cmd_line_args(int argc, char *argv[]) {
 //   char *ip;
 // } Sniff_response;
 
+#ifdef IS_PRINTF_ON
+    printf("Proceeding with parsing\n");
+#endif
 
-    if (IS_PRINTF_ON) printf("inside parsing\n");
-
-
-    if (IS_PRINTF_ON) printf("inside parsing %lu  \n", make_string_to_uL(argv[0]));
     packtObj->reply_ack = make_string_to_uL(argv[0]);
-
     packtObj->reply_seq = make_string_to_uL(argv[1]);
     packtObj->urg_ptr = make_string_to_int(argv[2]);
-
-
-    if (IS_PRINTF_ON) printf("inside parsing\n");
     packtObj->window = make_string_to_int(argv[3]);
     packtObj->port = make_string_to_int(argv[4]);
     packtObj->length = make_string_to_int(argv[5]);
-    if (IS_PRINTF_ON) printf("inside parsing\n");
-
     packtObj->ip = argv[6];
-
-    if (IS_PRINTF_ON) printf("inside parsing\n");
-    //Remember sock raw is 7th guy
-
+    //Raw Socket is at 7th position
     int len_base64 = make_string_to_int(argv[8]);
-
     char *baseOP = argv[9];
     int ubLen;
-
+    // Revert back base64 encoding
     unsigned char *unBaseOp = unbase64(baseOP, len_base64, &ubLen);
 
     if (ubLen != 32) {
@@ -791,6 +790,11 @@ Sniff_response *parse_cmd_line_args(int argc, char *argv[]) {
 
 }
 
+/**
+ * Displays contents of packet captured via sniffing
+ * @param  {Sniff_response*} packtObj Struct containing per packet params
+ * @return {void}
+ */
 void display_packet(Sniff_response *packtObj) {
     printf("Single Connection");
     printf("-> printing packet :\n");
@@ -802,31 +806,32 @@ void display_packet(Sniff_response *packtObj) {
     printf("-> packet ip : %s\n", packtObj->ip);
 }
 
-int main(int argc, char *argv[]) {
 
-
+int main(int argc, char *argv[])
+{
     if (argc != 2) {
-        if (IS_PRINTF_ON) printf(" argc %d\n", argc);
-        if (IS_PRINTF_ON)
-            printf("Usage: sudo ./single_conn  reply_ack  reply_seq  urg_ptr  window        port  length  ip sock_raw  len_base64 base64String URL\n");
+#ifdef IS_PRINTF_ON
+        printf(" argc %d\n", argc);
+        printf("Usage: sudo ./single_conn  reply_ack  reply_seq  urg_ptr  window        port  length  ip sock_raw  len_base64 base64String URL\n");
+#endif
         return -1;
     }
     char **argumentValue = tokenize_with_sep(argv[1]);
     int x = 0;
+
+#ifdef IS_PRINTF_ON
     for (x = 0; x < 9; x++)
-        if (IS_PRINTF_ON) printf(" %d %s", x, argumentValue[x]);
-
+        printf(" %d %s", x, argumentValue[x]);
+#endif
     Sniff_response *resp = parse_cmd_line_args(argc, argumentValue);
-
     strcpy(self_ip, resp->ip);
-    printf("self_ip=%s\n", self_ip);
+    printf("System IP = %s\n", self_ip);
 
+#ifdef IS_PRINTF_ON
+    printf("-> printing packet :\n");
+#endif
 
-    if (IS_PRINTF_ON) printf("-> printing packet :\n");
     display_packet(resp);
-
-//exit(0);
-
 
     pthread_t od_thread, client_thread;
     head = NULL;
@@ -867,7 +872,8 @@ int main(int argc, char *argv[]) {
     if (IS_PRINTF_ON) printf("\nSniffing for responses!\n");
 
 
-    /************************libpcap initialization*******************************/
+    // Intialization of libpcap
+    // TODO : Pull out name of interface programmatically.
     char dev[] = {"eth0"};
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *descr;
@@ -880,14 +886,17 @@ int main(int argc, char *argv[]) {
     int bytes_written = sprintf(filter_exp, "dst port %d and src port %d and src host %s",
                                 443, resp->port, resp->ip);
 
+#ifdef IS_PRINTF_ON
     printf("filter_exp %s\n", filter_exp);
-
+#endif
 
     bpf_u_int32 ipaddr;
 
     u_char *ptr; /* printing out hardware header info */
 
+#ifdef IS_PRINTF_ON
     printf("DEV: %s\n", dev);
+#endif
 
     /* open the device for sniffing.
 
@@ -921,49 +930,27 @@ int main(int argc, char *argv[]) {
         printf("Error setting filter - %s\n", pcap_geterr(descr));
         return 2;
     }
-    /*****************************libpcap init end********************************/
 
-
-
-
-    // while (1) {
-
+    //Only Need to process single connection
     KeyObj *iKey = (KeyObj *) malloc(sizeof(KeyObj));
     iKey->key_value = (char *) malloc(sizeof(char) * 32);
     iKey->isRSA_priv = 1;
 
 
-    if (IS_PRINTF_ON) printf("Sniffing for url!\n");
-    //  Sniff_response *resp = sniff(sock_raw, self_ip, NULL, 1 , iKey);
 
-
-    //if (resp == NULL) continue;
-
-    if (IS_PRINTF_ON) printf("back from sniffing!\n");
 
     strncpy(iKey->key_value, resp->msg, 32);
 
-
-
-    //printf("resp[32] %c",resp->msg[32]);
-    //strncpy(MERI_KEY,resp->msg,32);
-    //printf(" MERI_KEY : %s \n ",MERI_KEY);
-
-    //printf(" KEY_VAL : %s \n ",iKey->key_value );
-    //printf("got url %s\n", resp->msg + 32);
-
-    if (!resp->msg || resp->msg[32] != 'h') {
-
-
+    if (!resp->msg || resp->msg[32] != 'h')
+    {
         printf("Invalid url in single_conn -> %s\n", &resp->msg[32]);
         exit(0);
-        //continue;
     }
-    //rsa_priv=0;
     iKey->isRSA_priv = 0;
 
-    if (IS_PRINTF_ON) printf("got url %s\n", resp->msg + 32);
-    // send reset to OD
+#ifdef IS_PRINTF_ON
+    printf("Response Message : %s\n", resp->msg + 32);
+#endif
 
     int pkt_size = sizeof(struct tcphdr);
     char *tpkt = malloc(pkt_size);
@@ -989,18 +976,18 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (sendto(sock, tpkt, pkt_size, 0, (struct sockaddr *) &dest, sklen) < 0) {
-        //if(IS_PRINTF_ON)
+    if (sendto(sock, tpkt, pkt_size, 0, (struct sockaddr *) &dest, sklen) < 0)
+    {
         printf("Failed to send rst packet to the OD!\n");
         return 0;
     }
     close(sock);
     iKey->descr = descr;
 
-
     ODC *od_content = malloc(sizeof(ODC));
-    if (od_content == NULL) {
-        if (IS_PRINTF_ON) printf("No more memory!\n");
+    if (od_content == NULL)
+    {
+        printf("No more memory!\n");
         return 1;
     }
     od_content->ctx = ctx;
@@ -1008,6 +995,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&condc, NULL);    /* Initialize consumer condition variable */
     pthread_cond_init(&condp, NULL);    /* Initialize producer condition variable */
+
 
     pthread_create(&od_thread, NULL, get_od_content, od_content);
     pthread_create(&client_thread, NULL, proxy_to_client, &(*iKey));

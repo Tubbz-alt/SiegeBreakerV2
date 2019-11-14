@@ -28,12 +28,15 @@ typedef struct Reliable_header {
 } rel_header;
 
 
-typedef struct KEY_OBJ_SRT {
+typedef struct KEY_OBJ_SRT
+{
+    // Key for encryption-decryption
     char *key_value;
+    //Boolean Indicating which kind of encryption-decryption method to perform
+    // 0 indicates RSA - public private crypto
     int isRSA_priv;
-
+    //libpcap descriptor for reading data.
     pcap_t *descr;
-
 } KeyObj;
 
 
