@@ -152,9 +152,7 @@ int main(int argc, char *argv[])
 
     char *str = (char *) malloc(100);
     int len;
-    //len = snprintf(str, 50, "./port_icmpTest.py 192.168.2.4 192.168.2.4 %s %d", argv[4], resp->port);
     len = snprintf(str, 100, "../webmail/client_send.py 192.168.2.4 192.168.2.4 %s %d", argv[4], resp->port);
-    //strcat(str,"\0");
     printf("\n%s\n",str);
     system(str);
 
@@ -178,6 +176,7 @@ int main(int argc, char *argv[])
     //Display Initial TLS packet before sending
     printf("Initial : %s\n key : %s\n", initial_packet + 32, out1);
 
+    //Send actual TLS packet.
     send_tls_packet(resp, initial_packet, sock_raw, target_ip, strlen(url) + 32 + 1);
 
     long double t0 = get_time();

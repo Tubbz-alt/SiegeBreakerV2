@@ -13,8 +13,8 @@ MAGIC_WORD = "Siege"
 GMAIL_WEBSITE = "https://www.gmail.com"
 
 
-CLIENT_MAIL = "nsl-test1@iiitd.ac.in"
-CONTROLLER_EMAIL = "nsl-test2@iiitd.ac.in"
+CLIENT_MAIL = "client@gmail.com"
+CONTROLLER_EMAIL = "controller@gmail.com"
 
 CLIENT_MAIL_PASSWD = 'XXXXXXXX-Enter-Password'
 CONTROLLER_EMAIL_PASSWD = "XXXXXXXX-Enter-Password"
