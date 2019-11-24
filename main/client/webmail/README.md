@@ -6,6 +6,7 @@ Build Requirements:
 2. Selenium
 3. Crypto
 
+Please make sure to run "chmod +x *.py" in this directory so it can invoked via c-lang based code. 
 
 Example usage:
 ./client_email.py < OD2 IP Address > < OD1 IP Address > < TimeoutInSeconds > < src_port > 
