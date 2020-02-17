@@ -3,7 +3,7 @@
 #Generic Dependencies
 sudo apt update
 sudo apt install -y build-essential
-sudo apt install -y gcc make python-minimal libssl-dev git python-pip
+sudo apt install -y gcc make python-minimal libssl-dev git python-pip wget
 
 #Install Seccure
 sudo apt-get install -y libgmp-dev build-essential python-dev python-pip libmpfr-dev libmpc-dev
@@ -51,6 +51,6 @@ make
 cd ../../
 cd ./proxy/
 make center
-make single_conn_queue
+make single_conn
 cd ../
 #
