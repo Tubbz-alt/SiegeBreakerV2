@@ -8,6 +8,9 @@ This repository contains code corresponding to SiegeBreaker, which, consists of 
                                                               
 # Building SiegeBreaker
 These steps are for Ubuntu 18.04 and derivatives. 
+#### The Extremely Easy way
+1. `docker pull himanshusagar/ubuntu_siegebreaker`
+2. Already built code is inside `/home/user/`
 #### The Easy way
 Build everything in single go via `build.sh` located inside <repo_path>/build.sh.
 #### The Not-so-easy way
