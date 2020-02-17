@@ -49,13 +49,15 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 
                                       
 # Running SiegeBreaker
+`git clone https://github.com/himanshusagar/SiegeBreakerV2`
 #### As a Client
 1. `cd <repo_path>/main/client/c`
 2. `sudo ./client.o PROXY_IP 443 URL TIMEOUT`
 3. Example Usage : `sudo ./client.o 192.168.2.5 443 https://censored_site/100M 40`
 
 #### As a Proxy
-1. `sudo ./center`
+1. `cd <repo_path>/main/proxy/`
+2. `sudo ./center.o`
 
 #### As a Controller
 
