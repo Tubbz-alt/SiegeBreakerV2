@@ -86,7 +86,7 @@ typedef struct {
     Sniff_response *resp;
 } ODC;
 
-/* Start point of functins and code for proxy to client communication */
+/* Start point of functions and code for proxy to client communication */
 
 /*  
     Additional header for providing reliability
@@ -171,9 +171,7 @@ void *proxy_to_client(void *_void_key_obj_ptr)
     usleep(500000);
     //sleep(1);
     int psize, last_ack = 1, oldopts, first_iter = 1;
-    //long double first,second;
-    //Create a raw socket of type IPPROTO
-    //int s = socket (AF_INET, SOCK_RAW, IPPROTO_RAW);
+
     unsigned int snd_bufsize = 10000, rcv_bufsize = 65535;
     int s = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     if (s < 0) {
@@ -221,15 +219,12 @@ void *proxy_to_client(void *_void_key_obj_ptr)
 
     struct sockaddr_in sin, cli_addr;
     rel_header *rhdr = (rel_header *) head->content, *rec_rhdr = (rel_header *) malloc(sizeof(rel_header));
-    //start->hdr = rhdr;
-    //rel_header *rec_rhdr;
     rec_rhdr->ack = 0;
     rhdr->seq = 1;
     rhdr->ack = 0;
     rhdr->timestamp = get_time();
     rhdr->type = 2;
-    //printf("head isn't null. %s\n", head->content + sizeof(rel_header));
-    //printf("Head isn't NULL\n");
+
     signal(SIGALRM, sig_handler);
     int bytes = 1, i = 1;
     int first = 1, expected_ack = 1, next_ack, offset;
@@ -249,34 +244,19 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             rhdr = (rel_header *) curr_posi->content;
             set_rel_header(rhdr, expected_ack, 2, get_time(), type, bytes);
             sem_getvalue(&sem, &semval);
-            //printf("Sem : %d\n",semval);
-            //if (semval == 1)
+
             no_of_packets--;
             if (no_of_packets <= 1) {
-                //printf("Looks like the last packet!\n");
                 rhdr->type = 10;
                 printf("Total time spent in sending : %Lf", get_time() - t0);
-                //kill(getpid() , SIGKILL);
-                //printf("\n Content of last packet : %s",curr_posi->content);
+
             }
-            //printf(" Just before sending the TLS packet !! %p\n", curr_posi->resp);
+
             if (DEBUG) printf("sending TLS packet to %s!\n", curr_posi->resp->ip);
-            // make TLS packet datagram, encrypt it and send
-            // XXX: Add some delay to fix the timeout packets.
-            //int sorry = 100000;
-            //while (sorry--);
-            //if (fork()==0) {
             send_tls_packet(curr_posi->resp, curr_posi->content, s, curr_posi->resp->ip,
                             curr_posi->length + sizeof(rel_header), iKey);
-            //if (DEBUG) printf("sent TLS packet!\n");
-            //return 0;
-            //}
-            //usleep(1000);
-            //printf("\n%d  %d   \n",(curr_size-window_size),curr_size);
             if (DEBUG) printf("\n%d : %d : %Lf : %d\n", rhdr->seq, rhdr->ack, rhdr->timestamp, rhdr->type);
-            //set_rel_header(rhdr,((curr_size-window_size)*(bytes+sizeof(rel_header)))+last_ack,2,(int)time(NULL),2);
             expected_ack += rhdr->length;
-            //printf("Length: %d, %d\n", rhdr->length, expected_ack);
             if (first) {
                 next_ack = expected_ack;
                 first = 0;
@@ -293,8 +273,6 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             curr_posi = curr_posi->next;
 
         }
-        //window_size=1;
-        //printf("%d packet/s sent\n",curr_size);
         ualarm(500000, 0);
 
         duplicate:
@@ -331,12 +309,10 @@ void *proxy_to_client(void *_void_key_obj_ptr)
         offset = rec_rhdr->ack;
         last_ack = rec_rhdr->ack;
         if (last_ack == next_ack) {
-            //alarm(0);
             del = curr_acked;
             curr_acked = curr_acked->next;
-            //curr_posi=curr_acked;
             free(del);
-            //rhdr=(rel_header *)curr_posi->content;
+
             if (DEBUG) printf("Freed packet %d!!\n", count++);
             if (curr_posi != NULL)
                 next_ack = next_ack + curr_posi->length + sizeof(rel_header);
