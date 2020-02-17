@@ -69,10 +69,5 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 2. `ryu-manager controller_HP3500yl.py`
 3. Depending upon which signalling mechanism used in client setup, run corresponding email receiver in controller system.
 
-#### Pick one type of signalling - smtplib/imap or webmail
-
-
-
-
 ## Acknowledgements:
 1. base64.h used from https://github.com/superwills/NibbleAndAHalf
