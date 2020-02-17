@@ -6,13 +6,11 @@ import sys
 
 from utils import crypt
 from utils.constants import *
-from webmail.utils import smtp_helper
-from webmail.utils.crypt import get_encrypted_content, seccure_get_decrypted_content
+from utils import smtp_helper
+from utils.crypt import get_encrypted_content, seccure_get_decrypted_content
 
 
 def main(argv):
-    print("asdsad")
-
     if len(argv) != 5:
         print('usage: ./<name>.py <OD2 IP Address> <OD1 IP Address> <TimeoutInSeconds> <src_port> Your Len ' + str(
             len(argv)))
