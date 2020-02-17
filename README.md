@@ -60,6 +60,8 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 2. `sudo ./center.o`
 
 #### As a Controller
+1. `cd <repo_path>/main/controller/`
+2. `ryu-manager controller_HP3500yl.py`
 
 
 
