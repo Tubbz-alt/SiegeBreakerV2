@@ -2,24 +2,24 @@
 
 #Generic Dependencies
 sudo apt update
-sudo apt install build-essential
-sudo apt install gcc make python-minimal libssl-dev git python-pip
+sudo apt install -y build-essential
+sudo apt install -y gcc make python-minimal libssl-dev git python-pip
 
 #Install Seccure
-apt-get install libgmp-dev build-essential python-dev python-pip libmpfr-dev libmpc-dev
+sudo apt-get install -y libgmp-dev build-essential python-dev python-pip libmpfr-dev libmpc-dev
 pip install seccure
 
 #Install Ryu
 pip install ryu
 
 #Install pcap
-apt install libpcap-dev
+sudo apt install -y libpcap-dev
 
 #Selenium Dependencies
 #Install Chrome
 
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install ./google-chrome-stable_current_amd64.deb
+sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
 #Install Chrome Driver
 version="`wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE`"
