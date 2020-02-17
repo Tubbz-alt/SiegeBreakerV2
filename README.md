@@ -28,7 +28,7 @@ Clone a fresh copy of code. Install Dependencies and Build Code.
 
 Install all dependencies and code one by one.
 ###### Install Generic Dependencies
-`sudo apt update && sudo apt install gcc make python-minimal libssl-dev git python-pip`
+1. `sudo apt update && sudo apt install gcc make python-minimal libssl-dev git python-pip`
 ###### Install Seccure
 1. `sudo apt install libgmp-dev build-essential python-dev python-pip libmpfr-dev libmpc-dev`
 2. `pip install seccure`
