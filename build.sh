@@ -3,7 +3,7 @@
 #Generic Dependencies
 sudo apt update
 sudo apt install -y build-essential
-sudo apt install -y gcc make python-minimal libssl-dev git python-pip wget
+sudo apt install -y gcc make python-minimal libssl-dev git python-pip wget unzip
 
 #Install Seccure
 sudo apt-get install -y libgmp-dev build-essential python-dev python-pip libmpfr-dev libmpc-dev
@@ -29,12 +29,9 @@ compUrl="${baseUrl}/${version}"
 comStr="wget -N  ${compUrl}/chromedriver_linux64.zip"
 ${comStr}
 
-unzip ./chromedriver_linux64.zip -d ~/Downloads
-sudo mv -f ~/Downloads/chromedriver /usr/local/share/
-sudo chmod +x /usr/local/share/chromedriver
-sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
-sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
-
+unzip ./chromedriver_linux64.zip -d /tmp/
+sudo mv -f /tmp/chromedriver /usr/local/bin/
+sudo chmod +x /usr/local/bin/chromedriver
 
 pip install scapy selenium
 
