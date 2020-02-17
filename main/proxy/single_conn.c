@@ -162,8 +162,7 @@ void *proxy_to_client(void *_void_key_obj_ptr)
 {
     KeyObj *iKey = (KeyObj *) _void_key_obj_ptr;
 
-    //printf("in proxy_to_client\n");
-    //pkt *start;//=(pkt *)malloc(sizeof(pkt));
+
     pkt *curr;//=(pkt *)malloc(sizeof(pkt));
     pkt *curr_posi, *curr_acked, *del;
     //start=curr;
@@ -293,65 +292,17 @@ void *proxy_to_client(void *_void_key_obj_ptr)
 
             curr_posi = curr_posi->next;
 
-
-            //if (DEBUG) printf("Waiting for producer\n");
-            /* static struct timespec time_to_wait = {0, 0};
-             time_to_wait.tv_sec = get_time() + TIMEOUT_SECS;
-             int r = sem_timedwait(&sem, &time_to_wait);
-             sem_getvalue(&sem, &semval);
-
-
-             if (DEBUG) printf("got: %d, sem: %d\n", r, semval);
-             if (r == -1)
-         {
-               // no more data
-
-           //printf("No more data!\n");
-           //if (curr_acked == NULL) {
-     //      pthread_exit(NULL);
-       //    }
-           //goto duplicate;
-           //rhdr->type = 10;
-               //send_tls_packet(curr_posi->resp, curr_posi->content, s, curr_posi->resp->ip, sizeof(rel_header));
-           //curr_posi = NULL;
-     //	  exit(0);
-
-     kill(getpid() , SIGKILL);
-
-           break;
-           //curr_posi = curr_acked;
-           //pthread_exit(NULL);
-             }*/
-            /*else
-                curr_posi=curr_posi->next;
-            if (DEBUG) printf("%p\n", curr_posi);
-
-            if(curr_posi==NULL)
-        { printf("\n Not enough Packets!!");
-          continue;
-          //break;
-        }*/
         }
         //window_size=1;
         //printf("%d packet/s sent\n",curr_size);
         ualarm(500000, 0);
-        //alarm(1);
-        //printf(":%d:",timeout);
-//  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+
         duplicate:
         if (DEBUG) printf("Waiting for pkt from client!\n");
-        //int sock = socket(PF_PACKET, SOCK_DGRAM, IPPROTO_TCP);
-        //if (sock < 0) {
-        // printf("Socket Error!\n");
-        // return NULL;
-        //}
-
         //************************libpcap*************************
 
 
         client_resp = sniff(descr, self_ip, NULL, 1, iKey);
-        //printf("Done for pkt!\n");
-        // recieve from client
 
         if (timeout == 0) {
             int file_offset;
@@ -360,9 +311,7 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             timeout = 1;
             if (expected_ack > 1025)
                 expected_ack = offset;
-            //alarm(2);
-            // meed to go back n here. Adjust acked value
-            //  offset-=1024;
+
             curr_posi = curr_acked;
             //set_rel_header(rhdr,((curr_size-window_size)*(bytes+sizeof(rel_header)))+offset,2,(int)time(NULL),2);
             goto retransmit;
@@ -372,25 +321,15 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             return NULL;
         }
         reply = client_resp->msg;
-        //printf("got reply from client, %s %d\n", reply+sizeof(rel_header), client_resp->length);
-        // clear the packet in pkts
-        // alowing the other thread to fill it with a newer packet
-
         if (DEBUG) printf("ACK Received before timeout!\n");
         rec_rhdr = (rel_header *) reply;
         rec_data = reply + sizeof(rel_header);
         RTT = RTT + (get_time() - rec_rhdr->timestamp);
-        //printf("\n %d   :",strlen(rec_data));
         if (DEBUG)
             printf("Printing header before freeing   %d : %d : %Lf : %d\n", rec_rhdr->seq, rec_rhdr->ack,
                    rec_rhdr->timestamp, rec_rhdr->type);
         offset = rec_rhdr->ack;
-        //printf("offset: %d\n", rec_rhdr->ack);
-        //alarm(0);
-        //timeout=1;
-        //printf("\nACKs  %d  %d\n",expected_ack,rec_rhdr->ack);
         last_ack = rec_rhdr->ack;
-        //printf("\n Last ACK : %d   Expcted ACK : %d",rec_rhdr->ack,expected_ack);
         if (last_ack == next_ack) {
             //alarm(0);
             del = curr_acked;
@@ -406,18 +345,6 @@ void *proxy_to_client(void *_void_key_obj_ptr)
         }
         if (last_ack == expected_ack) {
             ualarm(0, 0);
-            //alarm(0);
-            /*int loop=curr_size;
-            while(loop--)
-            {
-              del=curr_acked;
-              if(curr_acked->next==NULL)
-                break;
-              curr_acked=curr_acked->next;
-              free(del);
-            }*/
-            //printf("%d packets received\n",curr_size);
-            //curr_posi=curr_acked;
 
             RTT = RTT / curr_size;
             //printf("RTT : %Lf\n",RTT);
@@ -431,12 +358,7 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             if (DEBUG) printf("\n bk=%Lf", bk);
             bk_p = bk;
             BWE_p = BWE;
-            /*if(curr_size>=8)
-            {
-              prev_size=8;
-              curr_size=8;
-            }
-            else*/ if (state) {
+            if (state) {
                 prev_size = curr_size;
                 curr_size *= 2;
             } else {
@@ -451,7 +373,6 @@ void *proxy_to_client(void *_void_key_obj_ptr)
             }
             window_size = curr_size;
             if (DEBUG) printf("\nws=%d\n", window_size);
-            //expected_ack=expected_ack+(curr_size*(976+sizeof(rel_header)));
             prev_RTT = RTT;
             if (rhdr->type == 10 || curr_posi == NULL)
                 //exit(0);
@@ -459,20 +380,6 @@ void *proxy_to_client(void *_void_key_obj_ptr)
 
         } else
             goto duplicate;
-        //prev_rtt=rec_rhdr->timestamp;
-        //printf("\n\n \t\t %d \t\t %d",rhdr->type,rec_rhdr->type);
-        /*if(rhdr->type==10)
-        {
-          printf("\n%s",data);
-          return NULL;
-          //alarm(0);
-          //pthread_exit(NULL);
-          //break;
-        }
-        //else
-        //  goto duplicate;
-        */
-
 
     }
     close(s);
@@ -647,17 +554,7 @@ void *get_od_content(void *odc) {
             break;
         }
 
-        /*
-        // make a new pkt
-        //if (DEBUG) printf("%d - %s\n", i, od_resp);
-        //if (DEBUG) printf("waiting for lock!\n");
-        pthread_mutex_lock(&mutex);
-        //if (DEBUG) printf("I am adding pkt!\n");
-        add_pkt(od_resp, resp, i);
-        //if (DEBUG)
-        //printf("added pkt!\n");
-        pthread_mutex_unlock(&mutex);
-        sem_post(&sem);*/  /* wake up consumer */
+
     }
 #ifdef IS_PRINTF_ON
     //printf("\nTime to download and make queue : %Lf\n Time to just read : %Lf \n\n Time for last read : %Lf",get_time()-t0,t2,t3);

@@ -19,10 +19,10 @@ Following docker image has already dependencies installed. Thus we only need to 
 
 #### The Easy way
 Clone a fresh copy of code. Install Dependencies and Build Code. 
-3. `git clone https://github.com/himanshusagar/SiegeBreakerV2`
-4. `cd SiegeBreakerV2/`
-5. `chmod +x build_dep.sh && chmod +x build_code.sh`
-6. `./build_dep.sh && ./build_code.sh`
+1. `git clone https://github.com/himanshusagar/SiegeBreakerV2`
+2. `cd SiegeBreakerV2/`
+3. `chmod +x build_dep.sh && chmod +x build_code.sh`
+4. `./build_dep.sh && ./build_code.sh`
 
 #### The Not-so-easy way
 
