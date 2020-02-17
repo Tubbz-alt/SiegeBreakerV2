@@ -9,13 +9,24 @@ This repository contains code corresponding to SiegeBreaker, which, consists of 
 # Building SiegeBreaker
 These steps are for Ubuntu 18.04 and derivatives. 
 #### The Extremely Easy way
+Following docker image has already dependencies installed. Thus we only need to build code.
 1. `docker pull himanshusagar/ubuntu_siegebreaker`
-2. Already built code is inside `/home/user/`
+2. `cd /home/user/`
+3. `git clone https://github.com/himanshusagar/SiegeBreakerV2`
+4. `cd SiegeBreakerV2/`
+5. `chmod +x build_code.sh`
+6. `./build_code.sh`
+
 #### The Easy way
-Build everything in single go via `build.sh` located inside <repo_path>/build.sh.
+Clone a fresh copy of code. Install Dependencies and Build Code. 
+3. `git clone https://github.com/himanshusagar/SiegeBreakerV2`
+4. `cd SiegeBreakerV2/`
+5. `chmod +x build_dep.sh && chmod +x build_code.sh`
+6. `./build_dep.sh && ./build_code.sh`
+
 #### The Not-so-easy way
 
-Install all dependencies one by one.
+Install all dependencies and code one by one.
 ###### Install Generic Dependencies
 `sudo apt update && sudo apt install gcc make python-minimal libssl-dev git python-pip`
 ###### Install Seccure
@@ -47,7 +58,7 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 ###### Build proxy
 1. `cd ./proxy/`
 2. `make center`
-3. `make single_conn_queue`
+3. `make single_conn`
 4. `cd ../`
 
                                       
@@ -55,9 +66,9 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 `git clone https://github.com/himanshusagar/SiegeBreakerV2`
 #### As a Client
 1. `cd <repo_path>/main/client/c`
-2. `sudo ./client.o PROXY_IP 443 URL TIMEOUT`
-3. Example Usage : `sudo ./client.o 192.168.2.5 443 https://censored_site/100M 40`
-4. By default, webmail singalling mechanism is used. This can be changed to "smtp/imap" based signaling in [client.c](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/c/client.c#L155) by changing 'client_send.py' to '[smtp_client_send](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/smtp/smtp_client_send.py)'
+2. `sudo ./client.o OD_IP 443 URL TIMEOUT`
+3. Example Usage : `sudo ./client.o https://allowed_site.com 443 https://censored_site/100M 40`
+4. By default, webmail singalling mechanism is used. This can be changed to "smtp/imap" based signaling in [client.c](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/c/client.c#L155) by changing '_client_send.py_' to '[smtp_client_send.py](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/smtp/smtp_client_send.py)'
 
 
 #### As a Proxy
