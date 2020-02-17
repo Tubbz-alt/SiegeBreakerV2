@@ -54,6 +54,8 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 1. `cd <repo_path>/main/client/c`
 2. `sudo ./client.o PROXY_IP 443 URL TIMEOUT`
 3. Example Usage : `sudo ./client.o 192.168.2.5 443 https://censored_site/100M 40`
+4. By default, webmail singalling mechanism is used. This can be changed to "smtp/imap" based signaling in [client.c](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/c/client.c#L155) by changing 'client_send.py' to '[smtp_client_send](https://github.com/himanshusagar/SiegeBreakerV2/blob/master/main/client/smtp/smtp_client_send.py)'
+
 
 #### As a Proxy
 1. `cd <repo_path>/main/proxy/`
@@ -62,6 +64,9 @@ There are two signaling mechanisms in place - "smtplib/imap" and webmail. "smtpl
 #### As a Controller
 1. `cd <repo_path>/main/controller/`
 2. `ryu-manager controller_HP3500yl.py`
+3. Depending upon which signalling mechanism used in client setup, run corresponding email receiver in controller system.
+
+#### Pick one type of signalling - smtplib/imap or webmail
 
 
 

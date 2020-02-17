@@ -9,7 +9,9 @@ from utils.constants import *
 from utils import smtp_helper
 from utils.crypt import get_encrypted_content, seccure_get_decrypted_content
 
-
+'''
+Function for sending email via smtp/imap based email on client side.
+'''
 def main(argv):
     if len(argv) != 5:
         print('usage: ./<name>.py <OD2 IP Address> <OD1 IP Address> <TimeoutInSeconds> <src_port> Your Len ' + str(
@@ -28,13 +30,13 @@ def main(argv):
 
     payload = MAGIC_WORD + SEP + OD2_IP + SEP + OD1_IP + SEP + TIMEOUT + SEP + SRC_PORT + SEP + ISN_NUMBER + SEP + PUBLIC_KEY + SEP
 
-    print("Payload : " + PING_A_SUBJECT + " : " + payload)
+    print("Payload : " + CLIENT_A_SUBJECT + " : " + payload)
     cipher_text = get_encrypted_content(payload)
 
     sender_email = CLIENT_MAIL
     sender_passwd = CLIENT_MAIL_PASSWD
     recv_email = CONTROLLER_EMAIL
-    subject_txt = PING_A_SUBJECT
+    subject_txt = CLIENT_A_SUBJECT
     body_txt = cipher_text
 
     smtp_helper.login_send_mail(sender_email, sender_passwd, recv_email, subject_txt, body_txt);
@@ -55,10 +57,10 @@ def main(argv):
     plain_text = seccure_get_decrypted_content( cipher_text ,  PRIVATEKEY)
 
 
-    if plain_text == PING_A_ACK_BODY:
+    if plain_text == CLIENT_A_ACK_BODY:
         print("DECOY ROUTING SETUP COMPLETE")
     else:
-        print(plain_text + "&&" + PING_A_ACK_BODY)
+        print(plain_text + "&&" + CLIENT_A_ACK_BODY)
 
 
 
